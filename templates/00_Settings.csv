@@ -1,0 +1,7 @@
+Key,Value,Notes
+CalendarYear,2026,ปีของปฏิทินที่จะ generate
+Currency,THB,สกุลเงินสำหรับ dashboard
+DateStart,2026-01-01,ช่วงข้อมูลเริ่มต้นสำหรับ dashboard
+DateEnd,2026-12-31,ช่วงข้อมูลสิ้นสุดสำหรับ dashboard
+OwnerName,,ชื่อเจ้าของไฟล์
+LastRefreshed,,ระบบจะอัปเดตอัตโนมัติ

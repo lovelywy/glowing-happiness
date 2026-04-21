@@ -1,0 +1,11 @@
+RecordID,Date,CategoryID,CategoryName,ContactID,ContactName,Description,Amount,Status,Month,Year
+R0001,2026-01-05,C001,,P001,,Project A kickoff invoice,150000,Paid,,
+R0002,2026-01-12,C003,,P005,,Office supplies,3200,Paid,,
+R0003,2026-01-18,C005,,P003,,Facebook ads Jan,12000,Paid,,
+R0004,2026-02-02,C002,,P002,,Monthly maintenance,45000,Paid,,
+R0005,2026-02-10,C004,,P005,,Client meeting travel,4800,Paid,,
+R0006,2026-02-22,C006,,P005,,Payroll Feb,180000,Paid,,
+R0007,2026-03-03,C001,,P001,,Project A milestone 1,200000,Pending,,
+R0008,2026-03-14,C008,,P005,,Team training workshop,15000,Paid,,
+R0009,2026-03-28,C007,,P005,,Utilities Q1,18000,Paid,,
+R0010,2026-04-05,C002,,P004,,Service renewal,60000,Pending,,

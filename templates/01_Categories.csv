@@ -1,0 +1,9 @@
+CategoryID,CategoryName,Type,Budget,Color,Active
+C001,Sales,Income,0,#34a853,TRUE
+C002,Service,Income,0,#4285f4,TRUE
+C003,Office,Expense,50000,#fbbc04,TRUE
+C004,Travel,Expense,30000,#ea4335,TRUE
+C005,Marketing,Expense,80000,#a142f4,TRUE
+C006,Payroll,Expense,200000,#ff6d01,TRUE
+C007,Utilities,Expense,20000,#00acc1,TRUE
+C008,Training,Expense,15000,#8e24aa,TRUE

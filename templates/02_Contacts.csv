@@ -1,0 +1,6 @@
+ContactID,Name,Company,Email,Phone,Role,Notes
+P001,Somchai J.,Acme Co.,somchai@acme.co.th,0812345678,Client,
+P002,Narin K.,Beta Ltd.,narin@beta.co.th,0898765432,Client,
+P003,Apinya W.,Gamma Inc.,apinya@gamma.co.th,0877778888,Supplier,
+P004,Chaiwat P.,Delta Corp.,chaiwat@delta.co.th,0865554444,Supplier,
+P005,Internal,,internal@company.co.th,,Internal,
