@@ -18,7 +18,7 @@
 | E–I | Line1..Line5 | Text | คลิกขวา → Hide columns |
 | J–L | Paid By 1..3 | Text | ใส่ชื่อคนจ่าย |
 | M | Remark | Text | **ที่ parser อ่าน** เช่น `T1+1200 T2-500` |
-| N | กำไรรวม | Number | สูตรแนะนำ: `=C2-D2` หรือ `=SUM(Q2:<ก่อน Log Time>)` |
+| N | กำไรรวม | Number | **ระบบเติมให้อัตโนมัติ** = ผลรวมคอลัมน์ T* ของแถว |
 | O | ✓ | Checkbox | Insert → Checkbox |
 | P | Match ID | Text | เมื่อกรอก A จะ auto-sequence |
 | Q+ | T1, T2, … | Number | ระบบสร้างให้เองถ้าชื่อใหม่ |

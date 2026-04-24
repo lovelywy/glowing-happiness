@@ -87,6 +87,20 @@ function applySummaryToRow_(row, flat) {
   });
 }
 
+/**
+ * คำนวณ N (กำไรรวม) = ผลรวมคอลัมน์ T* ของแถวนั้น
+ * (ระหว่าง Match ID+1 ถึง Log Time-1)
+ */
+function recalcProfit_(row) {
+  const sh = sheet_();
+  const logCol = findLogTimeCol_();
+  const empStart = MATCH_ID_COL + 1;
+  if (logCol <= empStart) return;
+  const vals = sh.getRange(row, empStart, 1, logCol - empStart).getValues()[0];
+  const total = vals.reduce((s, v) => s + (Number(v) || 0), 0);
+  sh.getRange(row, PROFIT_COL).setValue(total);
+}
+
 function applySummaryFromCurrentRow() {
   const sh = sheet_();
   const row = sh.getActiveRange().getRow();
@@ -95,6 +109,7 @@ function applySummaryFromCurrentRow() {
   const flat = flattenSummary(parseSummary(remark));
   if (!Object.keys(flat).length) { toast_('ไม่พบ pattern ใน Remark'); return; }
   applySummaryToRow_(row, flat);
+  recalcProfit_(row);
   toast_('อัปเดต: ' + JSON.stringify(flat));
 }
 
@@ -118,7 +133,10 @@ function onEdit(e) {
     // apply parser อัตโนมัติเมื่อแก้ Remark
     if (col === REMARK_COL && e.value) {
       const flat = flattenSummary(parseSummary(e.value));
-      if (Object.keys(flat).length) applySummaryToRow_(row, flat);
+      if (Object.keys(flat).length) {
+        applySummaryToRow_(row, flat);
+        recalcProfit_(row);
+      }
     }
 
     // ติ๊กเช็คบ็อกซ์ → lock + ส่ง LINE
@@ -281,6 +299,7 @@ function promptApplyFromImage() {
   if (!Object.keys(flat).length) { toast_('parser ไม่เจอ pattern'); return; }
   const row = sheet_().getActiveRange().getRow();
   applySummaryToRow_(row, flat);
+  recalcProfit_(row);
 }
 
 function extractDriveId_(s) {
