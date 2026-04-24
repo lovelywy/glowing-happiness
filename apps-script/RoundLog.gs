@@ -29,13 +29,23 @@ const PAIR_NO_COL  = 1;   // A
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Round Log')
+    .addItem('🚀 Install / Reset all sheets', 'installAll')
+    .addSeparator()
     .addItem('Apply summary from Remark (current row)', 'applySummaryFromCurrentRow')
     .addItem('Apply summary from OCR image URL...',     'promptApplyFromImage')
     .addItem('Send current row to LINE',                'sendCurrentRowToLine')
+    .addItem('Recalculate profit (current row)',        'recalcProfitCurrentRow')
     .addItem('Run parser self-test',                    'testParser')
     .addSeparator()
     .addItem('Set LINE token...',                       'promptSetLineToken')
     .addToUi();
+}
+
+function recalcProfitCurrentRow() {
+  const row = sheet_().getActiveRange().getRow();
+  if (row < 2) { toast_('ต้องอยู่ที่แถวข้อมูล'); return; }
+  recalcProfit_(row);
+  toast_('คำนวณกำไรรวมใหม่แล้ว');
 }
 
 // ───────────────────────────────────────────── core
@@ -115,7 +125,12 @@ function applySummaryFromCurrentRow() {
 
 // ───────────────────────────────────────────── onEdit → ติ๊กเช็คบ็อกซ์
 
-function onEdit(e) {
+/**
+ * handleEdit: เรียกจาก installable trigger เท่านั้น (ดู Setup.gs)
+ * ไม่ตั้งชื่อเป็น onEdit เพื่อกัน simple trigger ยิงซ้ำ
+ * (simple trigger + installable trigger จะทำให้ parse บวกเลขสองครั้ง)
+ */
+function handleEdit(e) {
   try {
     if (!e || !e.range) return;
     const sh = e.range.getSheet();
@@ -124,10 +139,13 @@ function onEdit(e) {
     const col = e.range.getColumn();
     if (row < 2) return;
 
-    // auto-sequence คอลัมน์ A เมื่อมีการเพิ่มข้อมูล Match ID
+    // auto-sequence คอลัมน์ A + ตั้ง Log Time เมื่อกรอก Match ID
     if (col === MATCH_ID_COL && e.value) {
       const pairCell = sh.getRange(row, PAIR_NO_COL);
       if (!pairCell.getValue()) pairCell.setValue(row - 1);
+      const logCol = findLogTimeCol_();
+      const logCell = sh.getRange(row, logCol);
+      if (!logCell.getValue()) logCell.setValue(new Date());
     }
 
     // apply parser อัตโนมัติเมื่อแก้ Remark
@@ -144,7 +162,7 @@ function onEdit(e) {
       finalizeRow_(row);
     }
   } catch (err) {
-    console.error('onEdit failed: ' + err.stack);
+    console.error('handleEdit failed: ' + err.stack);
   }
 }
 

@@ -1,93 +1,91 @@
-# Round Log — คู่มือติดตั้ง
+# Round Log — วิธีติดตั้ง (3 ขั้น)
 
-## 1) สร้างชีท
+## ขั้น 1 — สร้างชีทเปล่า
 
-- เปิด Google Sheet ของพี่ลี่
-- สร้างชีทชื่อ **`Round Log`** (ตัวพิมพ์/เว้นวรรคตรงเป๊ะ)
-- File → Import → Upload → เลือก `templates/07_RoundLog.csv`
-  - Import location: **Replace current sheet**
+1. เปิด https://sheets.google.com → กด **+ Blank**
+2. ตั้งชื่อไฟล์ (ชื่ออะไรก็ได้)
 
-## 2) ตั้ง format คอลัมน์
+## ขั้น 2 — วางโค้ด
 
-| Col | Header | Format | หมายเหตุ |
-|-----|--------|--------|--------|
-| A | คู่ที่ | Number | auto-fill เมื่อมี Match ID |
-| B | Total Back (VND) | Number with thousand separator | |
-| C | Total Back (THB) | Number | `=B2/เรทปัจจุบัน` ถ้าอยากให้คำนวณเอง |
-| D | Lay Stake | Number | |
-| E–I | Line1..Line5 | Text | คลิกขวา → Hide columns |
-| J–L | Paid By 1..3 | Text | ใส่ชื่อคนจ่าย |
-| M | Remark | Text | **ที่ parser อ่าน** เช่น `T1+1200 T2-500` |
-| N | กำไรรวม | Number | **ระบบเติมให้อัตโนมัติ** = ผลรวมคอลัมน์ T* ของแถว |
-| O | ✓ | Checkbox | Insert → Checkbox |
-| P | Match ID | Text | เมื่อกรอก A จะ auto-sequence |
-| Q+ | T1, T2, … | Number | ระบบสร้างให้เองถ้าชื่อใหม่ |
-| last | Log Time | Datetime | ระบบเติมเมื่อทิ๊ก O |
+1. เมนู **Extensions → Apps Script**
+2. ลบ `Code.gs` ทิ้ง
+3. สร้างไฟล์ 3 ตัว แล้วก๊อปโค้ดมาวาง
+   - `Parser.gs` ← `apps-script/Parser.gs`
+   - `RoundLog.gs` ← `apps-script/RoundLog.gs`
+   - `Setup.gs` ← `apps-script/Setup.gs`
+4. ⚙ **Project Settings** → ติ๊ก **"Show appsscript.json"**
+5. เปิด `appsscript.json` ลบทิ้ง → ก๊อป `apps-script/appsscript.json` มาวาง
+6. แถบซ้าย → **Services** (+) → **Drive API** → Add
+7. กด 💾 **Save**
 
-## 3) ติดตั้ง Apps Script
+## ขั้น 3 — ติดตั้งอัตโนมัติ
 
-1. Extensions → Apps Script
-2. ลบไฟล์ default แล้ววาง 3 ไฟล์
-   - `appsscript.json` (ต้องกด ⚙ Project Settings → "Show appsscript.json")
-   - `Parser.gs`
-   - `RoundLog.gs`
-3. Services (+) → เพิ่ม **Drive API v3** (identifier: `Drive`)
-4. กด **Save** แล้ว **Deploy > Test deployments** (ไม่จำเป็น แค่ให้ oauth prompt)
-5. Reload ชีท → เมนูใหม่ **`Round Log`** จะปรากฏ
+1. กลับมาที่ชีท → **รีเฟรชหน้า (F5)**
+2. เมนูใหม่ **Round Log** โผล่ด้านบน
+3. กด **🚀 Install / Reset all sheets**
+4. Google จะขอสิทธิ์ครั้งแรก → Allow (ถ้าเตือน "Google hasn't verified" → Advanced → Go to project → Allow)
+5. รอ 3–5 วินาที ระบบสร้าง 3 ชีทให้เอง:
+   - **Round Log** — บันทึกข้อมูล
+   - **Dashboard** — สรุปกำไร/พนักงาน
+   - **Calendar** — 12 เดือน
 
-## 4) ตั้ง LINE Notify token
+---
 
-1. ไปที่ https://notify-bot.line.me/ → Generate token → เลือกห้องที่จะรับ
-2. ในชีท: `Round Log` → **Set LINE token…** → วาง token
-3. Token เก็บใน Script Properties (ไม่อยู่ในชีท)
+## การใช้งาน
 
-## 5) การใช้งาน
+### บันทึกคู่ใหม่
+1. ไปชีท **Round Log** แถวถัดไป
+2. กรอก Total Back, Lay Stake, Paid By, **Match ID**
+   - เมื่อกรอก Match ID → `คู่ที่` กับ `Log Time` เติมให้เอง
+3. กรอก **Remark** ว่าใครได้/เสียเท่าไหร่ เช่น `T1+1200 T2-500`
+   - ระบบ parse แล้วเติมลงคอลัมน์ T1, T2 ให้เอง
+   - ถ้าชื่อใหม่ (เช่น T9) → สร้างคอลัมน์ใหม่ก่อน Log Time ให้เอง
+   - `กำไรรวม` (N) เติมให้เอง = ผลรวม T*
 
-### parse summary จาก Remark อัตโนมัติ
-- กรอก Remark ว่า `T1+1200 T2-500` หรือ `ที1 ได้ 1200`
-- `onEdit` จะเติมตัวเลขเข้า column T1/T2 ให้เอง
-- ถ้าพนักงานชื่อใหม่ (เช่น `T9`) ระบบแทรกคอลัมน์ใหม่ก่อน `Log Time` ให้
+### ปิดคู่
+- ทิ๊ก ✓ คอลัมน์ O
+- ระบบ: ล็อกแถว + export PNG + ส่ง LINE (ถ้าตั้ง token)
 
-### parse จากรูป (OCR)
-- อัปโหลดรูปสรุปยอดเข้า Google Drive
-- ก๊อป share link
-- เมนู `Round Log` → **Apply summary from OCR image URL…** → วาง link
-- ระบบ OCR (ภาษาไทย) → parse → เติมตัวเลข
+### ตั้ง LINE (ไม่บังคับ)
+1. https://notify-bot.line.me/my/ → Generate token
+2. เมนู `Round Log` → **Set LINE token…** → วาง
 
-### ปิดคู่ (ทิ๊กเช็คบ็อกซ์)
-- ทิ๊ก `✓` คอลัมน์ O
-- ระบบจะ:
-  1. ล็อกแถว (Protection range) — แก้ไขไม่ได้จนกว่าจะลบ protection
-  2. เซ็ต `Log Time` = now
-  3. Export แถวเป็น PNG ผ่าน Drive (ได้ public link)
-  4. ส่ง LINE: ข้อความสรุป + รูป
+### OCR จากรูป
+1. อัปรูปสรุปยอดเข้า Drive → ก๊อป share link
+2. เมนู `Round Log` → **Apply summary from OCR image URL…**
 
-## 6) รูปแบบ pattern ที่ parser รองรับ
+---
 
-| Input | Output |
+## Pattern ที่ parser รองรับ
+
+| Input | ผลลัพธ์ |
+|-------|---------|
+| `T1+1200` | T1: +1200 |
+| `T3-850` | T3: -850 |
+| `T1,T2,T3+1000` | ทั้ง 3 คน +1000 |
+| `T1 และ T2 +500` | ทั้ง 2 คน +500 |
+| `ที1 ได้ 1200` | T1: +1200 |
+| `ที1 เสีย 800` | T1: -800 |
+| `T1 ได้1000 และ T2 เสีย500` | T1: +1000, T2: -500 |
+| `ที๑ ได้ ๑๒๐๐` (เลขไทย) | T1: +1200 |
+| `T1+1,000 T2-2,500` (มี comma) | T1: +1000, T2: -2500 |
+
+---
+
+## ปัญหาที่เจอบ่อย
+
+| อาการ | วิธีแก้ |
 |-------|--------|
-| `T1+1200` | `{T1: +1200}` |
-| `T3-850` | `{T3: -850}` |
-| `T1,T2,T3+1000` | `{T1:+1000, T2:+1000, T3:+1000}` |
-| `T1 และ T2 +500` | `{T1:+500, T2:+500}` |
-| `ที1 ได้ 1200` | `{T1:+1200}` |
-| `ที1 เสีย 800` | `{T1:-800}` |
-| `T1 ได้1000 และ T2 เสีย500` | `{T1:+1000, T2:-500}` |
-| `ที๑ ได้ ๑๒๐๐` (เลขไทย) | `{T1:+1200}` |
-| `T1+1,000 T2-2,500` | `{T1:+1000, T2:-2500}` |
+| ไม่เห็นเมนู Round Log | รีเฟรชหน้าชีท (F5) |
+| กดเมนูแล้วไม่มีอะไรเกิดขึ้น | Google กำลังขอสิทธิ์ครั้งแรก รออนุญาตก่อน |
+| Dashboard / Calendar ขึ้น #ERROR! | ยังไม่มีข้อมูลใน Round Log, ปกติ |
+| LINE ส่งไม่เข้า | เช็ก token ที่ `Round Log → Set LINE token…` |
+| parser ไม่ทำงาน | เช็กว่าเขียน T ตามด้วยเลข (T1, T2) ไม่ใช่ชื่อจริง |
 
-ทดสอบ parser: Apps Script editor → เลือก `testParser` → Run → View Logs
+---
 
-## 7) ข้อจำกัดที่ต้องรู้
+## ข้อจำกัด (สำหรับอนาคต)
 
-- **Screenshot** — Apps Script ไม่มี native screenshot API; ใช้ Sheets export URL แทน.
-  ผลลัพธ์อาจจัดหน้ากว้างเกินถ้าคอลัมน์เยอะ — ถ้าพี่ลี่อยากได้การ์ดสวย ๆ
-  เปลี่ยนไปใช้ HTML template → render ผ่าน Charts/Apps Script HTMLService
-- **LINE Notify** — กำลังถูก LINE announce deprecation; ถ้าพี่ลี่เปิดใช้ไม่ได้
-  ผมเปลี่ยนเป็น Messaging API ได้ (broadcast/push ด้วย channel access token)
-- **Row lock** — ใช้ `Protection.removeEditors(...)`; editor ที่เป็น owner
-  จะ override ได้ — ถ้าต้องการ hard lock ต้องย้าย sheet ไปเป็น view-only
-  สำหรับ user อื่น
-- **onEdit** — simple trigger ไม่มี permission เรียก UrlFetch/Drive; ถ้าเจอ error
-  ต้องสร้าง installable trigger: Apps Script → Triggers → Add → `onEdit` function,
-  event type: On edit
+- **LINE Notify** กำลังถูก deprecate — ถ้าปิดบริการจะต้องย้ายไป Messaging API
+- **Screenshot** ใช้ Sheets export PNG — ถ้าแถวกว้างมาก รูปอาจเล็ก
+- **Row lock** เป็น Sheet Protection — owner ของไฟล์ยัง override ได้
