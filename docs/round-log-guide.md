@@ -24,10 +24,12 @@
 2. เมนูใหม่ **Round Log** โผล่ด้านบน
 3. กด **🚀 Install / Reset all sheets**
 4. Google จะขอสิทธิ์ครั้งแรก → Allow (ถ้าเตือน "Google hasn't verified" → Advanced → Go to project → Allow)
-5. รอ 3–5 วินาที ระบบสร้าง 3 ชีทให้เอง:
+5. รอ 3–5 วินาที ระบบสร้าง 4 ชีทให้เอง:
    - **Round Log** — บันทึกข้อมูล
-   - **Dashboard** — สรุปกำไร/พนักงาน
+   - **Dashboard** — KPI + สรุปรายพนักงาน + กำไรรายวัน
    - **Calendar** — 12 เดือน
+   - **Search** — ค้นหา filter ได้
+6. (ไม่บังคับ) เมนู `Round Log → 📊 Refresh charts` เพื่อสร้างกราฟใน Dashboard
 
 ---
 
@@ -53,6 +55,21 @@
 ### OCR จากรูป
 1. อัปรูปสรุปยอดเข้า Drive → ก๊อป share link
 2. เมนู `Round Log` → **Apply summary from OCR image URL…**
+
+### ค้นหาข้อมูล
+ไปที่ชีท **Search** กรอกได้ทุก filter รวมกัน:
+- คำค้น (เจอใน Remark หรือ Match ID)
+- พนักงาน (เช่น `T1`)
+- ช่วงวันที่
+- เฉพาะคู่ที่ปิดแล้ว ✓
+
+ลบค่าใน filter เพื่อ reset
+
+### ทดสอบด้วยข้อมูลตัวอย่าง
+เมนู `Round Log → 🧪 Test → Insert 5 sample rows` — เติม 5 แถวตัวอย่างให้ทดสอบ
+จะเห็นผลที่ Dashboard / Calendar / Search ทันที
+
+ล้างทิ้ง: `Round Log → 🧪 Test → Clear all data`
 
 ---
 

@@ -19,6 +19,7 @@ function installAll() {
   setupRoundLog_(ss);
   setupDashboard_(ss);
   setupCalendar_(ss);
+  setupSearch_(ss);
   createInstallableTrigger_();
   ss.toast('ติดตั้งเสร็จ! ไปที่ชีท Round Log เริ่มกรอกข้อมูลได้เลย', 'Setup', 8);
 }
@@ -236,6 +237,168 @@ function setupCalendar_(ss) {
 }
 
 // ─────────────────────────────────── Installable trigger (onEdit needs UrlFetch scope)
+
+// ─────────────────────────────────── Search
+
+const SEARCH_SHEET = 'Search';
+
+function setupSearch_(ss) {
+  let sh = ss.getSheetByName(SEARCH_SHEET);
+  if (!sh) sh = ss.insertSheet(SEARCH_SHEET);
+  sh.clear();
+  sh.clearConditionalFormatRules();
+
+  sh.getRange(1, 1, 1, 6).setValues([['ค้นหา Round Log', '', '', '', '', '']])
+    .merge().setFontSize(14).setFontWeight('bold')
+    .setBackground('#1f2937').setFontColor('#ffffff')
+    .setHorizontalAlignment('center');
+
+  // filter inputs (row 3)
+  sh.getRange(3, 1, 1, 6).setValues([
+    ['คำค้น (Remark/Match ID)', 'พนักงาน (เช่น T1)', 'จาก (วันที่)', 'ถึง (วันที่)', 'เฉพาะที่ปิดแล้ว ✓', 'รีเซ็ต']
+  ]).setFontWeight('bold').setBackground('#e5e7eb');
+
+  sh.getRange(4, 5).insertCheckboxes();
+  sh.getRange(4, 3).setNumberFormat('yyyy-mm-dd');
+  sh.getRange(4, 4).setNumberFormat('yyyy-mm-dd');
+  sh.getRange(4, 6).setValue('ลบค่าด้านบนเพื่อรีเซ็ต').setFontStyle('italic').setFontColor('#6b7280');
+
+  // results header (row 6)
+  sh.getRange(6, 1, 1, 6).setValues([['คู่ที่', 'Match ID', 'วันที่', 'Remark', 'กำไรรวม', 'ปิดแล้ว']])
+    .setFontWeight('bold').setBackground('#374151').setFontColor('#ffffff');
+
+  // QUERY formula at A7 — กรองตามค่าใน row 4
+  sh.getRange('A7').setFormula(
+    "=IFERROR(" +
+    "LET(" +
+      "logCol, MATCH(\"Log Time\", 'Round Log'!1:1, 0), " +
+      "logLetter, REGEXEXTRACT(ADDRESS(1, logCol, 4), \"[A-Z]+\"), " +
+      "dates, INDIRECT(\"'Round Log'!\"&logLetter&\"2:\"&logLetter), " +
+      "kw, A4, emp, UPPER(B4), df, C4, dt, D4, onlyClosed, E4, " +
+      "pair, 'Round Log'!A2:A, " +
+      "mid, 'Round Log'!P2:P, " +
+      "remark, 'Round Log'!M2:M, " +
+      "profit, 'Round Log'!N2:N, " +
+      "closed, 'Round Log'!O2:O, " +
+      "src, {pair, mid, dates, remark, profit, closed}, " +
+      "FILTER(src, " +
+        "pair<>\"\", " +
+        "IF(kw=\"\", pair=pair, ISNUMBER(SEARCH(LOWER(kw), LOWER(remark&\" \"&mid)))), " +
+        "IF(emp=\"\", pair=pair, ISNUMBER(SEARCH(emp, UPPER(remark)))), " +
+        "IF(df=\"\", pair=pair, IFERROR(dates>=df, FALSE)), " +
+        "IF(dt=\"\", pair=pair, IFERROR(dates<=dt+TIME(23,59,59), FALSE)), " +
+        "IF(onlyClosed=TRUE, closed=TRUE, pair=pair)" +
+      ")" +
+    "), \"ไม่พบผลลัพธ์ — ลองลบ filter ดู\")"
+  );
+
+  sh.getRange(7, 3, 100, 1).setNumberFormat('yyyy-mm-dd hh:mm');
+  sh.getRange(7, 5, 100, 1).setNumberFormat('#,##0;[red]-#,##0');
+
+  sh.setColumnWidth(1, 60);
+  sh.setColumnWidth(2, 120);
+  sh.setColumnWidth(3, 120);
+  sh.setColumnWidth(4, 280);
+  sh.setColumnWidth(5, 100);
+  sh.setColumnWidth(6, 80);
+  sh.setFrozenRows(6);
+}
+
+// ─────────────────────────────────── Charts on Dashboard
+
+function refreshCharts() {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(DASH_SHEET);
+  if (!sh) return;
+
+  // ลบ chart เก่า
+  sh.getCharts().forEach(c => sh.removeChart(c));
+
+  const empRange = sh.getRange('A14:B40');
+  const dailyRange = sh.getRange('E14:F44');
+
+  const empChart = sh.newChart()
+    .setChartType(Charts.ChartType.BAR)
+    .addRange(empRange)
+    .setOption('title', 'กำไร/ขาดทุนรายพนักงาน')
+    .setOption('legend', {position: 'none'})
+    .setOption('width', 480)
+    .setOption('height', 320)
+    .setPosition(13, 8, 0, 0)
+    .build();
+  sh.insertChart(empChart);
+
+  const dailyChart = sh.newChart()
+    .setChartType(Charts.ChartType.LINE)
+    .addRange(dailyRange)
+    .setOption('title', 'กำไรรายวัน')
+    .setOption('legend', {position: 'none'})
+    .setOption('width', 480)
+    .setOption('height', 320)
+    .setPosition(30, 8, 0, 0)
+    .build();
+  sh.insertChart(dailyChart);
+
+  ss.toast('สร้างกราฟใน Dashboard แล้ว', 'Setup', 4);
+}
+
+// ─────────────────────────────────── Sample data
+
+function insertSampleData() {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(SHEET_NAME);
+  if (!sh) { ss.toast('ยังไม่มีชีท Round Log — กด Install ก่อน', 'Setup', 6); return; }
+
+  const lastRow = sh.getLastRow();
+  const startRow = Math.max(lastRow + 1, 2);
+  const today = new Date();
+  const day = (n) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - n);
+
+  const samples = [
+    [1000000, 1300, 500, '', '', '', '', '', 'A', '', '', 'T1+1200 T2-500', '', false, 'M-001', day(2)],
+    [800000,  1040, 400, '', '', '', '', '', 'A', '', '', 'ที1 ได้ 800', '', false, 'M-002', day(1)],
+    [1500000, 1950, 600, '', '', '', '', '', 'B', '', '', 'T1,T2,T3+1000', '', false, 'M-003', day(1)],
+    [600000,   780, 300, '', '', '', '', '', 'A', '', '', 'T2-300 T3+500', '', false, 'M-004', day(0)],
+    [1200000, 1560, 480, '', '', '', '', '', 'C', '', '', 'T1 ได้1500 และ T3 เสีย200', '', false, 'M-005', day(0)],
+  ];
+
+  // เขียน column B..P (Total Back VND ถึง Match ID) แล้วเขียน Log Time ที่ logCol
+  const logCol = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
+    .findIndex(h => String(h).trim() === 'Log Time') + 1;
+
+  samples.forEach((row, i) => {
+    const r = startRow + i;
+    // คอลัมน์ B (Total Back VND) ถึง P (Match ID) คือ index 0..14 ของ row
+    sh.getRange(r, 2, 1, 15).setValues([row.slice(0, 15)]);
+    // Log Time
+    sh.getRange(r, logCol).setValue(row[15]);
+    // คู่ที่ A
+    sh.getRange(r, 1).setValue(r - 1);
+    // trigger parse manually (เพราะ setValues ไม่กระตุ้น onEdit)
+    const flat = flattenSummary(parseSummary(row[11]));
+    if (Object.keys(flat).length) {
+      applySummaryToRow_(r, flat);
+      recalcProfit_(r);
+    }
+  });
+
+  ss.toast('เพิ่ม 5 แถวตัวอย่าง — ดูผลที่ Dashboard / Calendar / Search', 'Setup', 8);
+}
+
+function clearAllData() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.alert('ยืนยันลบข้อมูลทั้งหมดใน Round Log?',
+    'header จะคงไว้, แต่ข้อมูลแถว 2 ลงไปจะถูกล้าง',
+    ui.ButtonSet.YES_NO);
+  if (res !== ui.Button.YES) return;
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  if (!sh) return;
+  // ลบ protection ก่อน
+  sh.getProtections(SpreadsheetApp.ProtectionType.RANGE).forEach(p => p.remove());
+  const lastRow = sh.getLastRow();
+  if (lastRow >= 2) sh.getRange(2, 1, lastRow - 1, sh.getLastColumn()).clearContent();
+  ui.alert('ลบเรียบร้อย');
+}
 
 function createInstallableTrigger_() {
   ScriptApp.getProjectTriggers()

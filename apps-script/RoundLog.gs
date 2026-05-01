@@ -30,6 +30,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Round Log')
     .addItem('🚀 Install / Reset all sheets', 'installAll')
+    .addItem('📊 Refresh charts',             'refreshCharts')
     .addSeparator()
     .addItem('Apply summary from Remark (current row)', 'applySummaryFromCurrentRow')
     .addItem('Apply summary from OCR image URL...',     'promptApplyFromImage')
@@ -37,6 +38,9 @@ function onOpen() {
     .addItem('Recalculate profit (current row)',        'recalcProfitCurrentRow')
     .addItem('Run parser self-test',                    'testParser')
     .addSeparator()
+    .addSubMenu(SpreadsheetApp.getUi().createMenu('🧪 Test')
+      .addItem('Insert 5 sample rows', 'insertSampleData')
+      .addItem('Clear all data',        'clearAllData'))
     .addItem('Set LINE token...',                       'promptSetLineToken')
     .addToUi();
 }
